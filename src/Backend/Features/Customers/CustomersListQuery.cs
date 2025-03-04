@@ -3,6 +3,7 @@ namespace Backend.Features.Customers;
 public class CustomersListQuery : IRequest<List<CustomersListQueryResponse>>
 {
     public string? Name { get; set; }
+    public string? SearchText { get; set; }
 }
 
 public class CustomersListQueryResponse
@@ -30,8 +31,13 @@ internal class CustomersListQueryHandler(BackendContext context) : IRequestHandl
     public async Task<List<CustomersListQueryResponse>> Handle(CustomersListQuery request, CancellationToken cancellationToken)
     {
         var query = context.Customers.AsQueryable();
-        if (!string.IsNullOrEmpty(request.Name))
-            query = query.Where(q => q.Name.ToLower().Contains(request.Name.ToLower()));
+
+        /*
+        Filter SearchText will filter on Name and Email. 
+        If the field is null, the query will show all the Customers
+        */
+        if (!string.IsNullOrEmpty(request.SearchText))
+            query = query.Where(q => q.Name.ToLower().Contains(request.SearchText.ToLower()) || q.Email.ToLower().Contains(request.SearchText.ToLower()));
 
         var data = await query.OrderBy(q => q.Name).ToListAsync(cancellationToken);
         var result = new List<CustomersListQueryResponse>();

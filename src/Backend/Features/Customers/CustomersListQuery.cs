@@ -4,6 +4,7 @@ public class CustomersListQuery : IRequest<List<CustomersListQueryResponse>>
 {
     public string? Name { get; set; }
     public string? SearchText { get; set; }
+    public string? SortBy { get; set; }     //Field that will order by Name and Email
 }
 
 public class CustomersListQueryResponse
@@ -39,7 +40,31 @@ internal class CustomersListQueryHandler(BackendContext context) : IRequestHandl
         if (!string.IsNullOrEmpty(request.SearchText))
             query = query.Where(q => q.Name.ToLower().Contains(request.SearchText.ToLower()) || q.Email.ToLower().Contains(request.SearchText.ToLower()));
 
-        var data = await query.OrderBy(q => q.Name).ToListAsync(cancellationToken);
+        /*
+        It will order by Name or Email depending on the
+        value of SortBy:
+        /api/customers/list?SortBy=Name -> will order by Name
+        /api/customers/list?SortBy=Email -> will order by Email
+        */
+        if (!string.IsNullOrEmpty(request.SortBy))
+        {
+            if (request.SortBy.Equals("Name", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.OrderBy(q => q.Name);
+            }
+            else if (request.SortBy.Equals("Email", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.OrderBy(q => q.Email);
+            }
+        }
+        // Will order by Name if SortBy is null by default
+        else
+        {
+            query = query.OrderBy(q => q.Name);
+        }
+            
+
+        var data = await query.ToListAsync(cancellationToken);
         var result = new List<CustomersListQueryResponse>();
 
         foreach (var item in data)

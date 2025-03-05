@@ -10,6 +10,9 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Pr
 var connectionString = builder.Configuration.GetConnectionString("Backend") ?? throw new ArgumentNullException("Backend Connectionsting not set");
 builder.Services.AddDbContext<BackendContext>(x => x.UseSqlite(connectionString));
 
+// Enables export of XML format
+builder.Services.AddControllers().AddXmlSerializerFormatters();
+
 // Build app
 var app = builder.Build();
 

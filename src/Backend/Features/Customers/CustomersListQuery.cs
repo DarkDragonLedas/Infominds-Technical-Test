@@ -2,7 +2,6 @@ namespace Backend.Features.Customers;
 
 public class CustomersListQuery : IRequest<List<CustomersListQueryResponse>>
 {
-    public string? Name { get; set; }
     public string? SearchText { get; set; }
     public string? SortBy { get; set; }     //Field that will order by Name and Email
 
@@ -64,13 +63,13 @@ internal class CustomersListQueryHandler(BackendContext context) : IRequestHandl
         /*
         Checks if Skip and Take are null.
         If they are, default values are assigned.
-        Shows all records.
+        Shows first 100 records.
         */
         if (!request.Skip.HasValue)
             request.Skip = 0;
 
         if (!request.Take.HasValue)
-            request.Take = int.MaxValue;
+            request.Take = 100;         // For all records available, request.Take = int.MaxValue;
 
         query = query.Skip(request.Skip.Value).Take(request.Take.Value);
 
